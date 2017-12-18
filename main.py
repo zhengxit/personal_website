@@ -1,16 +1,26 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect, url_for
 from forms import ContactForm
 from flask.ext.bootstrap import Bootstrap
 from flask_script import Manager
+from flask.ext.mail import Mail, Message
 
 app = Flask(__name__)
 manager = Manager(app)
 bootstrap = Bootstrap(app)
+mail = Mail()
 
 
 # unique token to prevent cross-site request forgery
-app.secret_key = 'zhengxi is great!'
+app.secret_key = 'today is a great day!!'
 
+# configuration for mail
+app.config["MAIL_SERVER"] = 'smtp.gmail.com'
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_SSL"] = True
+app.config["MAIL_USERNAME"] = 'real_email_address'
+app.config["MAIL_PASSWORD"] = 'real_email_password'
+
+mail.init_app(app)
 
 @app.route('/about')
 def about_view():
@@ -24,7 +34,11 @@ def contact_view():
             flash("All fields are required.")
             return render_template('contact.html', form=form)
         else:
-            return '<h2>Your form is submitted successfully!!</h2>'
+            msg = Message(form.subject.data, sender='zhengxitan1031@gmail.com', recipients=['zhengxit@umich.edu'])
+            msg.body = """%s""" % (form.message.data)
+            mail.send(msg)
+            flash("Your message is sent successfully!")
+            return redirect(url_for('contact_view'))
     elif request.method == 'GET':
         return render_template('contact.html', form=form)
 
