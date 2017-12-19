@@ -85,9 +85,21 @@ def contact_view():
     elif request.method == 'GET':
         return render_template('contact.html', form=form)
 
-@app.route('/blogs')
+@app.route('/blogs', methods=['GET', 'POST'])
 def blogs_view():
-    return render_template('blogs.html')
+    form = CommentForm()
+    if request.method == 'POST':
+        if form.validate() == False:
+            flash("All the fields are required.")
+            return render_template("blogs.html", form=form)
+        elif form.validate() == True and form.validate_on_submit():
+            comment_content = form.body.data
+            current_comment = Comment(body=comment_content, timestamp=datetime.utcnow())
+            db.session.add(current_comment)
+            return redirect(url_for('blogs_view'))
+    elif request.method == 'GET':
+        comments = Comment.query.all()
+        return render_template('blogs.html', form=form, comments=comments)
 
 @app.route('/resume')
 def resume_view():
@@ -100,4 +112,5 @@ def index():
 
 
 if __name__ == '__main__':
+    db.create_all()
     manager.run()
