@@ -93,7 +93,7 @@ def blogs_view():
     return render_template('blogs.html', posts=posts)
 
 
-@app.route('/blogs/<string:blogname>', methods=['GET', 'POST'])
+@app.route('/blogs/<blogname>', methods=['GET', 'POST'])
 def single_blog(blogname):
     form = CommentForm()
     current_blog = blogname + '.html'
@@ -102,12 +102,11 @@ def single_blog(blogname):
             flash("All the fields are required.")
             return render_template(current_blog, form=form)
         elif form.validate() == True and form.validate_on_submit():
-            comment_content = form.body.data
-            current_comment = Comment(body=comment_content, timestamp=datetime.utcnow())
+            current_comment = Comment(body=form.body.data, timestamp=datetime.utcnow(), post_id=request.args.get('post_id'))
             db.session.add(current_comment)
-            return redirect(url_for('single_blog', blogname=blogname))
+            return redirect(url_for('single_blog', blogname=blogname, post_id=request.args.get('post_id')))
     elif request.method == 'GET':
-        comments = Comment.query.all()
+        comments = Comment.query.filter_by(post_id=request.args.get('post_id')).all()
         return render_template(current_blog, form=form, comments=comments)
 
 

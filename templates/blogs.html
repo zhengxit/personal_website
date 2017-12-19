@@ -5,7 +5,7 @@
 
 <ul>
     {% for post in posts %}
-        <li><a href="{{ url_for('single_blog', blogname=post.header) }}">{{ post.header }}</a></li>
+        <li><a href="{{ url_for('single_blog', blogname=post.header, post_id=post.id) }}">{{ post.header }}</a></li>
     {% endfor %}
 </ul>
 
