@@ -57,6 +57,7 @@ class Comment(db.Model):
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
+    header = db.Column(db.Text)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     comments = db.relationship('Comment', backref='post')
@@ -85,21 +86,30 @@ def contact_view():
     elif request.method == 'GET':
         return render_template('contact.html', form=form)
 
-@app.route('/blogs', methods=['GET', 'POST'])
+@app.route('/blogs')
 def blogs_view():
+    posts = Post.query.all()
+    print 'This is for testing!'
+    return render_template('blogs.html', posts=posts)
+
+
+@app.route('/blogs/<string:blogname>', methods=['GET', 'POST'])
+def single_blog(blogname):
     form = CommentForm()
+    current_blog = blogname + '.html'
     if request.method == 'POST':
         if form.validate() == False:
             flash("All the fields are required.")
-            return render_template("blogs.html", form=form)
+            return render_template(current_blog, form=form)
         elif form.validate() == True and form.validate_on_submit():
             comment_content = form.body.data
             current_comment = Comment(body=comment_content, timestamp=datetime.utcnow())
             db.session.add(current_comment)
-            return redirect(url_for('blogs_view'))
+            return redirect(url_for('single_blog', blogname=blogname))
     elif request.method == 'GET':
         comments = Comment.query.all()
-        return render_template('blogs.html', form=form, comments=comments)
+        return render_template(current_blog, form=form, comments=comments)
+
 
 @app.route('/resume')
 def resume_view():

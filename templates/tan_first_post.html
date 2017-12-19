@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <h1>First Blog</h1>
+    <h2>Hello everyone! This is my first blog! I don't know what to say but welcome anyway!</h2>
+    <b>TANTANTANTAN</b>
+    <h3>The following are some comments: </h3>
+
+    {% for comment in comments %}
+        <p>Nice comment: {{ comment.body }} </p>
+    {% endfor %}
+
+    {{ wtf.quick_form(form) }}
+
+
+{% endblock %}
